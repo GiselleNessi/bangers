@@ -1,25 +1,23 @@
 import React, { useState, useEffect } from "react";
 import "./index.css";
 import "./App.css";
+import ipfsHashes from "./ipfsHashes.json";
+import placeholderImage from "./Logo_Negro.png";
 
-// Constants
-const TWITTER_HANDLE = "BtcBangers";
-const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
+
+const Loader = () => <div className="loader">Loading...</div>;
 
 const App: React.FC = () => {
-  const [images, setImages] = useState<string[]>([]);
-
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        // Array of IPFS hashes of your images
-        const ipfsHashes = ["QmTAz29LdJYL1f9jJ17yqyWP4AM7oM1WkyNWZCJTYjypFR", "QmaDco16foDUsqaTBBHhFGdDtMqXGrjDckLfD1ff1XcPtH", "QmYqWddbLb1TKvKfP5KFRjjes6cM5tqVgrdzoRBQwWZuXU"]; // Replace with your actual hashes
+        const imageList = ipfsHashes.map((item) => ({
+          name: item.name,
+          url: `https://gateway.pinata.cloud/ipfs/${item.hash}`
+        }));
 
-        // Construct URLs for fetching images
-        const imageUrls = ipfsHashes.map((hash) => `https://gateway.pinata.cloud/ipfs/${hash}`);
-
-        // Set the image URLs in state
-        setImages(imageUrls);
+        setImages(imageList);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching images:", error);
       }
@@ -28,67 +26,78 @@ const App: React.FC = () => {
     fetchImages();
   }, []);
 
+  const [images, setImages] = useState<{ name: string; url: string }[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const handleDownload = (url: string, filename: string) => {
+    fetch(url)
+      .then((response) => response.blob())
+      .then((blob) => {
+        const url = window.URL.createObjectURL(new Blob([blob]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", `${filename}.png`); // Specify the file extension here
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode?.removeChild(link);
+      })
+      .catch((error) => console.error("Error downloading image:", error));
+  };
+
+  const handleImageError = (index: number) => {
+    const updatedImages = [...images];
+    updatedImages[index].url = placeholderImage; // Replace the broken image URL with the placeholder image
+    setImages(updatedImages);
+  };
+
+  const filteredImages = images.filter((image) =>
+    image.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="App">
       <div className="container">
         <header className="header-container">
-          <h1 className="header"> Bangers </h1>
+          <img src={placeholderImage} alt="Centered Image" className="centered-image" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by name..."
+            className="searchInput"
+          />
         </header>
 
-        <main>
-          <div className="container"> {/* Apply container class from app.css */}
-            <div className="imageContainer"> {/* Apply imageContainer class from app.css */}
-              {images.map((imageUrl, index) => (
-                <div className="imageWrapper" key={index}> {/* Apply imageWrapper class from app.css */}
-                  <img src={imageUrl} alt={`Image ${index}`} className="image" /> {/* Apply image class from app.css */}
-                  <div className="buttonContainer"> {/* Apply buttonContainer class from app.css */}
-                    <button className="ctaButton" onClick={() => handleDownload(imageUrl)}>Download</button> {/* Apply ctaButton class from app.css */}
+        {loading ? (
+          <Loader />
+        ) : (
+          <main>
+            <div className="container">
+              <div className="imageContainer">
+                {filteredImages.map((image, index) => (
+                  <div className="imageWrapper" key={index}>
+                    <img
+                      src={image.url}
+                      alt={image.name}
+                      className="image"
+                      onError={() => handleImageError(index)} // Handle image loading errors
+                    />
+                    <button
+                      className="downloadButton"
+                      onClick={() => handleDownload(image.url, image.name)}
+                    >
+                      Download
+                    </button>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        </main>
-
-        <div className="footer-container">
-          <a
-            className="footer-text"
-            href={TWITTER_LINK}
-            target="_blank"
-            rel="noreferrer"
-          >{`follow @${TWITTER_HANDLE}`}</a>
-        </div>
+          </main>
+        )}
       </div>
     </div>
   );
-};
-
-const handleDownload = async (imageUrl: string) => {
-  try {
-    // Remove query parameters from the image URL
-    const cleanUrl = imageUrl.split("?")[0];
-
-    // Fetch the image data
-    const response = await fetch(cleanUrl);
-    const blob = await response.blob();
-
-    // Create a URL for the image data
-    const url = URL.createObjectURL(blob);
-
-    // Create a temporary anchor element
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `image${Date.now()}`); // Set a default filename
-    document.body.appendChild(link);
-
-    // Programmatically trigger the download
-    link.click();
-
-    // Remove the temporary anchor element
-    document.body.removeChild(link);
-  } catch (error) {
-    console.error("Error downloading image:", error);
-  }
 };
 
 export default App;

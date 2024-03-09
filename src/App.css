@@ -14,7 +14,6 @@
 }
 
 .App-header {
-  background-color: #282c34;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -38,15 +37,14 @@
 }
 
 .App {
-  height: 100vh;
-  background-color: rgb(20, 20, 20);
+  background-color: #fff;
   text-align: center;
   /* overflow: hidden; */
   overflow: scroll;
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 20px;
 }
@@ -54,13 +52,42 @@
 .imageContainer {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: space-evenly;
 }
 
 .imageWrapper {
   width: calc(25% - 20px); /* Adjust the width to accommodate four images per row */
   margin-bottom: 20px;
 }
+
+/* For larger screens, display 10 images per row */
+@media only screen and (min-width: 1200px) {
+  .imageWrapper {
+    width: calc(10% - 20px); /* Adjust the width to accommodate ten images per row */
+  }
+}
+
+/* For medium-sized screens, display 5 images per row */
+@media only screen and (max-width: 1200px) {
+  .imageWrapper {
+    width: calc(20% - 20px); /* Adjust the width to accommodate five images per row */
+  }
+}
+
+/* For smaller screens, display 2 images per row */
+@media only screen and (max-width: 768px) {
+  .imageWrapper {
+    width: calc(50% - 20px); /* Adjust the width to accommodate two images per row */
+  }
+}
+
+/* For very small screens, display 1 image per row */
+@media only screen and (max-width: 480px) {
+  .imageWrapper {
+    width: calc(100% - 20px); /* Adjust the width to accommodate one image per row */
+  }
+}
+
 
 .image {
   width: 100%;
@@ -272,4 +299,13 @@ button:disabled {
     background-position: 0% 50%;
   }
 }
+
+.centered-image {
+  display: block; /* Ensures the image takes up the full width available */
+  margin: 0 auto; /* Centers the image horizontally */
+  max-width: 300px; /* Ensures the image does not exceed the container's width */
+  height: auto; /* Allows the image to scale proportionally */
+}
+
+
 
