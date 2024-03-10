@@ -97,14 +97,9 @@ const App: React.FC = () => {
                       src={image.url}
                       alt={image.name}
                       className="image"
+                      onClick={() => handleDownload(image.url, image.name)} // Trigger download on image click
                       onError={() => handleImageError(index)} // Handle image loading errors
                     />
-                    <button
-                      className="downloadButton"
-                      onClick={() => handleDownload(image.url, image.name)}
-                    >
-                      Download
-                    </button>
                   </div>
                 ))}
               </div>

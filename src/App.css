@@ -60,6 +60,10 @@
   margin-bottom: 20px;
 }
 
+.imageWrapper:hover {
+  cursor: pointer;
+}
+
 /* For larger screens, display 10 images per row */
 @media only screen and (min-width: 1200px) {
   .imageWrapper {
