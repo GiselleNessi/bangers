@@ -51,9 +51,19 @@ const App: React.FC = () => {
     setImages(updatedImages);
   };
 
-  const filteredImages = images.filter((image) =>
-    image.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredImages = images.filter((image) => {
+    // Check if the search query is a number
+    const isNumeric = !isNaN(parseFloat(searchQuery)) && isFinite(parseFloat(searchQuery));
+
+    if (isNumeric) {
+      // If the search query is a number, check if the image name exactly matches the search query
+      return image.name === searchQuery;
+    } else {
+      // If the search query is not a number, perform case-insensitive search by name
+      return image.name.toLowerCase().includes(searchQuery.toLowerCase());
+    }
+  });
+
 
   return (
     <div className="App">
