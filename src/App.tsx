@@ -4,20 +4,27 @@ import "./App.css";
 import ipfsHashes from "./ipfsHashes.json";
 import placeholderImage from "./Logo_Negro.png";
 
-
 const Loader = () => <div className="loader">Loading...</div>;
 
 const App: React.FC = () => {
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const imageList = ipfsHashes.map((item) => ({
-          name: item.name,
-          url: `https://gateway.pinata.cloud/ipfs/${item.hash}`
-        }));
-
-        setImages(imageList);
-        setLoading(false);
+        // Check if images are already cached in localStorage
+        const cachedImages = localStorage.getItem("cachedImages");
+        if (cachedImages) {
+          setImages(JSON.parse(cachedImages));
+          setLoading(false);
+        } else {
+          // Fetch images from Pinata gateway and cache them
+          const imageList = ipfsHashes.map((item) => ({
+            name: item.name,
+            url: `https://gateway.pinata.cloud/ipfs/${item.hash}`
+          }));
+          localStorage.setItem("cachedImages", JSON.stringify(imageList));
+          setImages(imageList);
+          setLoading(false);
+        }
       } catch (error) {
         console.error("Error fetching images:", error);
       }
@@ -63,7 +70,6 @@ const App: React.FC = () => {
       return image.name.toLowerCase().includes(searchQuery.toLowerCase());
     }
   });
-
 
   return (
     <div className="App">
